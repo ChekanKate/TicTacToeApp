@@ -2,6 +2,8 @@ package com.chekan;
 
 import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Game {
 
@@ -17,29 +19,33 @@ public class Game {
     }
 
     public void runGame(){
-        System.out.print("Choose the number of players: 1 or 2 -> ");
-        int numOfPlayers = scanner.nextInt();
-        if(numOfPlayers == 1){
-            Scanner sc = new Scanner(System.in);
-            System.out.print("Player Name : ");
-            String nameOfPlayer1 = sc.nextLine();
-            Player player1 = new Player(nameOfPlayer1, 'X');
-            Player player2 = new Player("AI", 'O');
-            play(player1, player2);
-            result(player1, player2);
-        }else if(numOfPlayers == 2){
-            Scanner sc = new Scanner(System.in);
-            System.out.print("First Player Name : ");
-            String nameOfPlayer1 = sc.nextLine();
-            Player player1 = new Player(nameOfPlayer1, 'X');
-            System.out.print("Second Player Name : ");
-            String nameOfPlayer2 = sc.nextLine();
-            Player player2 = new Player(nameOfPlayer2, 'O');
-            play(player1, player2);
-            result(player1,player2);
-        }else {
-            System.out.print("Wrong number!");
-        }
+        boolean invalidNum = true;
+        do{
+            System.out.print("Choose the number of players: 1 or 2 -> ");
+            String input = scanner.nextLine();
+            if(input.equals("1")){
+                invalidNum = false;
+                Scanner sc = new Scanner(System.in);
+                System.out.print("Player Name : ");
+                String nameOfPlayer1 = sc.nextLine();
+                Player player1 = new Player(nameOfPlayer1, 'X');
+                Player player2 = new Player("AI", 'O');
+                play(player1, player2);
+                result(player1, player2);
+            }else if(input.equals("2")){
+                invalidNum = false;
+                Scanner sc = new Scanner(System.in);
+                System.out.print("First Player Name : ");
+                String nameOfPlayer1 = sc.nextLine();
+                Player player1 = new Player(nameOfPlayer1, 'X');
+                System.out.print("Second Player Name : ");
+                String nameOfPlayer2 = sc.nextLine();
+                Player player2 = new Player(nameOfPlayer2, 'O');
+                play(player1, player2);
+                result(player1,player2);
+            }
+        }while (invalidNum);
+
     }
 
     public void play(Player player1, Player player2){
@@ -90,14 +96,28 @@ public class Game {
     }
 
     public void peopleTurn(Player player){
-        int x;
-        int y;
+        if(player.getName().equals("AI")){
+
+        }
+        boolean badInput = true;
         do{
             System.out.println(player.getName() + ", please enter coordinate (x y) of " + player.getSign() + " in the range 1..." + n);
-            x = scanner.nextInt() - 1;
-            y = scanner.nextInt() - 1;
-        } while (!isOkCoordinates(x,y));
-        field[y][x] = player.getSign();
+            Scanner scanner = new Scanner(System.in);
+            String s = scanner.nextLine();
+            Pattern pattern = Pattern.compile("^([123]\\s[123])$");
+            Matcher matcher = pattern.matcher(s);
+            if (matcher.find()) {
+                String[] starr = s.split("\\s");
+                Integer[] num = new Integer[2];
+                for(int i = 0; i < starr.length; i++){
+                    num[i] = Integer.parseInt(starr[i]) - 1;
+                }
+                if(field[num[1]][num[0]] == EMPTY){
+                    badInput = false;
+                    field[num[1]][num[0]] = player.getSign();
+                }
+            }
+        }while (badInput);
     }
 
     public void AITurn(Player player){
@@ -107,15 +127,8 @@ public class Game {
         do {
             x = random.nextInt(n);
             y = random.nextInt(n);
-        } while (!isOkCoordinates(x, y));
+        } while (field[y][x] != EMPTY);
         field[y][x] = player.getSign();
-    }
-
-    public boolean isOkCoordinates(int x, int y){
-        if (x < 0 || y < 0 || x >= n || y >= n) {
-            return false;
-        }
-        return field[y][x] == EMPTY;
     }
 
     public void printField(){
